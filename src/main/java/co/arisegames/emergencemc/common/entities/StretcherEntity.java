@@ -1,16 +1,20 @@
 package co.arisegames.emergencemc.common.entities;
 
+import co.arisegames.emergencemc.EmergenceMC;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -81,6 +85,25 @@ public class StretcherEntity extends Entity {
         this.setMotion(this.getMotion().add(Vector3d.ZERO));
     }
 
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) {
+            return false;
+        } else if (!this.world.isRemote) {
+            boolean flag = source.getTrueSource() instanceof PlayerEntity && ((PlayerEntity)source.getTrueSource()).abilities.isCreativeMode;
+            if (flag) {
+                if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
+//                    this.entityDropItem();
+                }
+
+                this.remove();
+            }
+
+            return true;
+        } else {
+            return true;
+        }
+    }
+
     private void updateMotion() {
         Vector3d motion = this.movementVecMap.values().stream()
                 .map(m -> new Vector3d(m.x, 0, m.y))
@@ -99,15 +122,21 @@ public class StretcherEntity extends Entity {
      * Applies this boat's yaw to the given entity. Used to update the orientation of its passenger.
      */
     protected void applyYawToEntity(Entity entityToUpdate) {
-        entityToUpdate.setRenderYawOffset(this.rotationYaw);
-        float f = MathHelper.wrapDegrees(entityToUpdate.rotationYaw - this.rotationYaw);
-        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
+        float offset = 0;
+        if (getPassengerIndex(entityToUpdate) == 1) {
+            offset = 180;
+        }
+        float yaw = this.rotationYaw + offset;
+        entityToUpdate.setRenderYawOffset(yaw);
+        float f = MathHelper.wrapDegrees(entityToUpdate.rotationYaw - yaw);
+        float f1 = f;
+//        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
         entityToUpdate.prevRotationYaw += f1 - f;
         entityToUpdate.rotationYaw += f1 - f;
         entityToUpdate.setRotationYawHead(entityToUpdate.rotationYaw);
     }
 
-    private int getPassengerOffset(Entity passenger) {
+    private int getPassengerIndex(Entity passenger) {
         return this.getPassengers().indexOf(passenger);
     }
 
@@ -116,15 +145,13 @@ public class StretcherEntity extends Entity {
         double d0 = this.getPosY() + this.getMountedYOffset() + passenger.getYOffset();
         Vector3d pos = new Vector3d(this.getPosX(), d0, this.getPosZ());
         if (passenger instanceof PlayerEntity) {
-            int index = getPassengerOffset(passenger);
+            int index = getPassengerIndex(passenger);
             Vector3d offset = new Vector3d(0, 0, -1.5).rotateYaw((float) (-rotationYaw * Math.PI / 180));
             if (index == 1) offset = offset.rotateYaw((float) Math.PI);
-            applyYawToEntity(passenger);
 //            passenger.setRotationYawHe ad(index == 0 ? this.rotationYaw : this.rotationYaw + 180);
             pos = pos.add(offset);
-        } else {
-            passenger.rotationYaw = this.rotationYaw;
         }
+        applyYawToEntity(passenger);
         passenger.setPosition(pos.x, pos.y, pos.z);
     }
 
@@ -175,7 +202,15 @@ public class StretcherEntity extends Entity {
     @Override
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
-        passenger.setPose(Pose.SLEEPING);
+        if (!(passenger instanceof PlayerEntity))
+            passenger.setPose(Pose.DYING);
+        else
+            passenger.setPose(Pose.STANDING);
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return false;
     }
 
     @Override

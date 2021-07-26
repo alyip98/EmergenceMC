@@ -1,51 +1,18 @@
-package co.arisegames.emergencemc.common.entities;
+package co.arisegames.emergencemc.client.render;
 
-import co.arisegames.emergencemc.common.entities.rendering.StretcherModel;
+import co.arisegames.emergencemc.common.entities.StretcherEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.BoatModel;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.apache.logging.log4j.LogManager;
 
-//@OnlyIn(Dist.CLIENT)
-//public class StretcherRenderer extends EntityRenderer<StretcherEntity> {
-//    private final StretcherModel model = new StretcherModel();
-//    public StretcherRenderer(EntityRendererManager renderManagerIn) {
-//        super(renderManagerIn);
-//        LogManager.getLogger().info("new stretcher renderer");
-//    }
-//
-//    @Override
-//    public ResourceLocation getEntityTexture(StretcherEntity entity) {
-//        return AtlasTexture.LOCATION_BLOCKS_TEXTURE;
-//    }
-//
-//
-//    @Override
-//    public void render(StretcherEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
-//        super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-//        model.render(matrixStackIn,
-//                bufferIn.getBuffer(model.getRenderType(this.getEntityTexture(entityIn))),
-//                super.getPackedLight(entityIn, 1),
-//                OverlayTexture.NO_OVERLAY,
-//                1,
-//                1,
-//                1,
-//                1);
-//    }
-//}
 
 @OnlyIn(Dist.CLIENT)
 public class StretcherRenderer extends EntityRenderer<StretcherEntity> {
