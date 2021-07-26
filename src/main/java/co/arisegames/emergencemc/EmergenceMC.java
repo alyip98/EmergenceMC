@@ -1,11 +1,19 @@
 package co.arisegames.emergencemc;
 
+import co.arisegames.emergencemc.common.entities.EntityTypesInit;
+import co.arisegames.emergencemc.common.entities.StretcherRenderer;
+import co.arisegames.emergencemc.common.handlers.EmergenceMCPacketHandler;
+import co.arisegames.emergencemc.common.items.Extinguisher;
+import co.arisegames.emergencemc.common.network.StretcherMovePacket;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -19,13 +27,16 @@ import org.apache.logging.log4j.Logger;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("examplemod")
-public class ExampleMod
+@Mod("emergencemc")
+public class EmergenceMC
 {
+    public static final String MOD_ID = "emergencemc";
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public ExampleMod() {
+    private static int messageID = 0;
+
+    public EmergenceMC() {
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -37,6 +48,9 @@ public class ExampleMod
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        EntityTypesInit.ENTITY_TYPES.register(bus);
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -44,11 +58,15 @@ public class ExampleMod
         // some preinit code
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+
+        EmergenceMCPacketHandler.INSTANCE.registerMessage(messageID++, StretcherMovePacket.class, StretcherMovePacket::toBytes, StretcherMovePacket::new, StretcherMovePacket::process);
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+
+        RenderingRegistry.registerEntityRenderingHandler(EntityTypesInit.STRETCHER.get(), StretcherRenderer::new);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
@@ -79,6 +97,12 @@ public class ExampleMod
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
+        }
+
+        @SubscribeEvent
+        public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
+            LOGGER.info("Registering items");
+            itemRegistryEvent.getRegistry().registerAll(new Extinguisher(new Item.Properties()));
         }
     }
 }
