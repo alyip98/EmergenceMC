@@ -15,14 +15,14 @@ public class StretcherModel extends EntityModel<Entity> {
     private final ModelRenderer bb_main;
 
     public StretcherModel() {
-        textureWidth = 256;
-        textureHeight = 256;
+        textureWidth = 128;
+        textureHeight = 128;
 
         bb_main = new ModelRenderer(this);
-        bb_main.setRotationPoint(0.0F, 24.0F, 0.0F);
-        bb_main.setTextureOffset(0, 0).addBox(-16.0F, -1.0F, -15.0F, 1.0F, 1.0F, 63.0F, 0.0F, false);
-        bb_main.setTextureOffset(0, 0).addBox(-1.0F, -1.0F, -15.0F, 1.0F, 1.0F, 63.0F, 0.0F, false);
-        bb_main.setTextureOffset(66, 0).addBox(-15.0F, -1.0F, -1.0F, 14.0F, 1.0F, 36.0F, 0.0F, false);
+        bb_main.setRotationPoint(-7.0F, 23.5F, 17.5F);
+        bb_main.setTextureOffset(45, 0).addBox(-7.0F, -0.5F, -13.5F, 14.0F, 1.0F, 27.0F, 0.0F, false);
+        bb_main.setTextureOffset(0, 0).addBox(7.0F, -0.5F, -21.5F, 1.0F, 1.0F, 43.0F, 0.0F, false);
+        bb_main.setTextureOffset(0, 44).addBox(-8.0F, -0.5F, -21.5F, 1.0F, 1.0F, 43.0F, 0.0F, false);
     }
 
     @Override

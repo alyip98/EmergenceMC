@@ -102,7 +102,7 @@ minecraft {
             args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                examplemod {
+                EmergenceMC {
                     source sourceSets.main
                 }
             }

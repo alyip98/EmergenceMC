@@ -27,7 +27,7 @@ import static net.minecraft.entity.item.BoatEntity.func_242378_a;
 public class StretcherEntity extends Entity {
     private final Map<PlayerEntity, Vector2f> movementVecMap = new HashMap<>();
     private final Map<PlayerEntity, Vector3d> offsetsMap = new HashMap<>();
-    private final float defaultDistance = 0.5f;
+    private final float defaultDistance = 1.2f;
     private float playerDistance = 0;
 
 
@@ -86,28 +86,52 @@ public class StretcherEntity extends Entity {
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
-            return false;
-        } else if (!this.world.isRemote) {
-            boolean flag = source.getTrueSource() instanceof PlayerEntity && ((PlayerEntity)source.getTrueSource()).abilities.isCreativeMode;
-            if (flag) {
-                if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
-//                    this.entityDropItem();
-                }
+        this.removePassengers();
+        return true;
+//        if (this.isInvulnerableTo(source)) {
+//            return false;
+//        } else if (!this.world.isRemote) {
+//            boolean flag = source.getTrueSource() instanceof PlayerEntity && ((PlayerEntity)source.getTrueSource()).abilities.isCreativeMode;
+//            if (flag) {
+//                if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
+////                    this.entityDropItem();
+//                }
+//
+//                this.remove();
+//            }
+//
+//            return true;
+//        } else {
+//            return true;
+//        }
+    }
 
-                this.remove();
-            }
+    private int getPlayerPassengers() {
+        return (int) this.getPassengers().stream().filter(e -> e instanceof PlayerEntity).count();
+    }
 
-            return true;
-        } else {
-            return true;
+    private int getNonPlayerPassengers() {
+        return (int) this.getPassengers().stream().filter(e -> !(e instanceof PlayerEntity)).count();
+    }
+
+    private float getSpeed() {
+        if (getNonPlayerPassengers() == 0) {
+            return 0.12f;
+        }
+        switch (getPlayerPassengers()) {
+            case 0:
+                return 0;
+            case 1:
+                return 0.03f;
+            default:
+                return 0.12f;
         }
     }
 
     private void updateMotion() {
         Vector3d motion = this.movementVecMap.values().stream()
                 .map(m -> new Vector3d(m.x, 0, m.y))
-                .reduce(Vector3d.ZERO, Vector3d::add).scale(0.1f);
+                .reduce(Vector3d.ZERO, Vector3d::add).scale(getSpeed() * getSpeedFactor());
         Vector3d gravity = new Vector3d(0, -1, 0).scale(1);
         this.setMotion(motion.add(gravity));
         if (motion.dotProduct(motion) > 0) {
@@ -129,8 +153,8 @@ public class StretcherEntity extends Entity {
         float yaw = this.rotationYaw + offset;
         entityToUpdate.setRenderYawOffset(yaw);
         float f = MathHelper.wrapDegrees(entityToUpdate.rotationYaw - yaw);
-        float f1 = f;
-//        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
+//        float f1 = f;
+        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
         entityToUpdate.prevRotationYaw += f1 - f;
         entityToUpdate.rotationYaw += f1 - f;
         entityToUpdate.setRotationYawHead(entityToUpdate.rotationYaw);
@@ -146,10 +170,13 @@ public class StretcherEntity extends Entity {
         Vector3d pos = new Vector3d(this.getPosX(), d0, this.getPosZ());
         if (passenger instanceof PlayerEntity) {
             int index = getPassengerIndex(passenger);
-            Vector3d offset = new Vector3d(0, 0, -1.5).rotateYaw((float) (-rotationYaw * Math.PI / 180));
+            Vector3d offset = new Vector3d(0, 0, -defaultDistance).rotateYaw((float) (-rotationYaw * Math.PI / 180));
             if (index == 1) offset = offset.rotateYaw((float) Math.PI);
 //            passenger.setRotationYawHe ad(index == 0 ? this.rotationYaw : this.rotationYaw + 180);
             pos = pos.add(offset);
+        } else {
+            double passengerHeightOffset = 0.65;
+            pos = pos.add(0, passengerHeightOffset, 0);
         }
         applyYawToEntity(passenger);
         passenger.setPosition(pos.x, pos.y, pos.z);
@@ -248,7 +275,7 @@ public class StretcherEntity extends Entity {
 
     @Override
     public double getMountedYOffset() {
-        return 0.5f;
+        return 0.35f;
     }
 
 
