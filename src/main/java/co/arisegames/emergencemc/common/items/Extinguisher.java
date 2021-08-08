@@ -22,9 +22,8 @@ public class Extinguisher extends Item {
     private static final int RADIUS = 3;
     private static final double RANGE = 5;
 
-    public Extinguisher(Properties properties) {
-        super(properties.maxDamage(100).group(ItemGroup.MISC));
-        setRegistryName("extinguisher");
+    public Extinguisher() {
+        super(new Item.Properties().maxDamage(100).group(ItemGroup.MISC));
     }
 
     @Override

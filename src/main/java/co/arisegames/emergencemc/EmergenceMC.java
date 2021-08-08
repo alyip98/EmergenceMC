@@ -1,18 +1,29 @@
 package co.arisegames.emergencemc;
 
+import co.arisegames.emergencemc.common.blocks.LockedDoorBlock;
 import co.arisegames.emergencemc.common.entities.EntityTypesInit;
 import co.arisegames.emergencemc.client.render.StretcherRenderer;
 import co.arisegames.emergencemc.common.handlers.EmergenceMCPacketHandler;
+import co.arisegames.emergencemc.common.items.Crowbar;
 import co.arisegames.emergencemc.common.items.Extinguisher;
 import co.arisegames.emergencemc.common.network.StretcherMovePacket;
+import co.arisegames.emergencemc.common.network.SurvivorRescuedPacket;
+import co.arisegames.emergencemc.init.BlockInit;
+import co.arisegames.emergencemc.init.ItemInit;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -32,7 +43,7 @@ public class EmergenceMC
 {
     public static final String MOD_ID = "emergencemc";
     // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
 
     private static int messageID = 0;
 
@@ -50,6 +61,8 @@ public class EmergenceMC
         MinecraftForge.EVENT_BUS.register(this);
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        BlockInit.BLOCKS.register(bus);
+        ItemInit.ITEMS.register(bus);
         EntityTypesInit.ENTITY_TYPES.register(bus);
     }
 
@@ -60,6 +73,7 @@ public class EmergenceMC
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
 
         EmergenceMCPacketHandler.INSTANCE.registerMessage(messageID++, StretcherMovePacket.class, StretcherMovePacket::toBytes, StretcherMovePacket::new, StretcherMovePacket::process);
+        EmergenceMCPacketHandler.INSTANCE.registerMessage(messageID++, SurvivorRescuedPacket.class, SurvivorRescuedPacket::toBytes, SurvivorRescuedPacket::new, SurvivorRescuedPacket::process);
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -97,12 +111,18 @@ public class EmergenceMC
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
+            blockRegistryEvent.getRegistry().register(new LockedDoorBlock(AbstractBlock.Properties.create(Material.IRON)));
         }
 
         @SubscribeEvent
         public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
             LOGGER.info("Registering items");
-            itemRegistryEvent.getRegistry().registerAll(new Extinguisher(new Item.Properties()));
+
+            BlockInit.BLOCKS.getEntries().stream().map(RegistryObject::get).forEach(block -> {
+                itemRegistryEvent.getRegistry().register(new BlockItem(block, new Item.Properties().group(ItemGroup.MISC))
+                        .setRegistryName(block.getRegistryName()));
+            });
+//            itemRegistryEvent.getRegistry().registerAll(new BlockItem(new LockedDoorBlock(AbstractBlock.Properties.create(Material.IRON)), new Item.Properties()));
         }
     }
 }

@@ -33,7 +33,6 @@ public class StretcherEntity extends Entity {
 
     public StretcherEntity(EntityType<StretcherEntity> type, World world) {
         super(type, world);
-        LOGGER.info("spawning stretcher");
         this.stepHeight = 0.5f;
     }
 
@@ -45,7 +44,6 @@ public class StretcherEntity extends Entity {
     @Override
     public void remove() {
         super.remove();
-        LOGGER.info("removing stretcher");
     }
 
     @Override
@@ -266,7 +264,6 @@ public class StretcherEntity extends Entity {
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
-        LOGGER.info("removed");
     }
 
     public void updateInputs(PlayerEntity player, Vector2f vec) {
