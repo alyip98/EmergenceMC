@@ -2,6 +2,7 @@ package co.arisegames.emergencemc.common.blocks;
 
 import co.arisegames.emergencemc.common.handlers.EmergenceMCPacketHandler;
 import co.arisegames.emergencemc.common.network.SurvivorRescuedPacket;
+import co.arisegames.emergencemc.server.SurvivorManager;
 import co.arisegames.emergencemc.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -27,11 +28,12 @@ public class RescueBlock extends Block {
 //            RemoveVillager((VillagerEntity) entityIn);
             entityIn.remove();
             worldIn.playSound(null, pos, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1f, 1f);
-            if (!worldIn.isRemote)
+            if (!worldIn.isRemote) {
                 EmergenceMCPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SurvivorRescuedPacket(entityIn.getPositionVec()));
-            worldIn.getPlayers().forEach(playerEntity -> {
-                playerEntity.sendMessage(new StringTextComponent("A survivor has been rescued!"), entityIn.getUniqueID());
-            });
+                SurvivorManager.get().survivorRescued(((VillagerEntity) entityIn));
+//                worldIn.getPlayers().forEach(playerEntity -> playerEntity.sendMessage(new StringTextComponent("A survivor has been rescued!"), entityIn.getUniqueID()));
+            }
+
         }
     }
 }

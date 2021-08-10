@@ -60,9 +60,9 @@ public class SurvivorRescuedPacket {
         World world = Minecraft.getInstance().world;
         Vector3d base = new Vector3d(this.x, this.y, this.z);
         if (world.isRemote) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 40; i++) {
                 Vector3d p = RandomUtil.RandomPointInUnitCube().add(base).add(0, 0.5, 0);
-                Vector3d vel = RandomUtil.RandomPointInUnitCube().scale(0.3);
+                Vector3d vel = RandomUtil.RandomPointInUnitCube().scale(0.3).mul(1, 3, 1);
                 world.addParticle(ParticleTypes.FIREWORK, p.getX(), p.getY(), p.getZ(), vel.getX(), vel.getY(), vel.getZ());
             }
         }
