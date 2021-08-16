@@ -34,13 +34,19 @@ public class SurvivorManager extends WorldSavedData {
     }
 
     public int getRemainingSurvivorCount() {
-        return (int) survivors.stream().filter(t -> t != null && t.isAlive()).count();
+        return totalSurvivorCount - rescuedCount - lossCount;
     }
 
     public void survivorRescued(VillagerEntity survivor) {
         rescuedCount++;
         this.markDirty();
         survivor.world.getPlayers().forEach(playerEntity -> playerEntity.sendMessage(new StringTextComponent("A survivor has been rescued! " + toString()), survivor.getUniqueID()));
+        if (getRemainingSurvivorCount() == 0) {
+            survivor.world.getPlayers().forEach(playerEntity -> playerEntity.sendMessage(new StringTextComponent(
+                    "Game Over!\n" +
+                            "Rescued/Lost: " + rescuedCount + "/" + lossCount
+            ), survivor.getUniqueID()));
+        }
     }
 
 
@@ -50,12 +56,12 @@ public class SurvivorManager extends WorldSavedData {
         }
         this.lossCount++;
         this.markDirty();
-        e.world.getPlayers().forEach(playerEntity -> playerEntity.sendMessage(new StringTextComponent("A survivor has died! "+ toString()), e.getUniqueID()));
+        e.world.getPlayers().forEach(playerEntity -> playerEntity.sendMessage(new StringTextComponent("A survivor has died! " + toString()), e.getUniqueID()));
     }
 
     @Override
     public String toString() {
-        return String.format("%d remaining (%d/%d/%d)", totalSurvivorCount - rescuedCount - lossCount, rescuedCount, lossCount, totalSurvivorCount);
+        return String.format("%d remaining (%d/%d/%d)", getRemainingSurvivorCount(), rescuedCount, lossCount, totalSurvivorCount);
     }
 
     @Override
