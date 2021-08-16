@@ -64,11 +64,7 @@ public class Extinguisher extends Item {
         BlockPos base = context.getPos();
         World world = context.getWorld();
 
-        if (!world.isRemote()) {
-            StretcherEntity s = new StretcherEntity(EntityTypesInit.STRETCHER.get(), world);
-            s.setPosition(base.getX(), base.getY() + 1, base.getZ());
-            world.addEntity(s);
-        }
+
 
 
         LOGGER.info("Target: {}", base);

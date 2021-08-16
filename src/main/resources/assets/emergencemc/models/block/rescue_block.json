@@ -3,8 +3,7 @@
   "parent": "block/cube_all",
   "texture_size": [64, 64],
   "textures": {
-    "0": "emergencemc:blocks/rescue_block",
-    "particle": "block/texture"
+    "0": "emergencemc:blocks/rescue_block"
   },
   "elements": [
     {

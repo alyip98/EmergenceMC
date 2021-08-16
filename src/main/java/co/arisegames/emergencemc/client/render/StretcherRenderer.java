@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -28,10 +30,22 @@ public class StretcherRenderer extends EntityRenderer<StretcherEntity> {
 
     public void render(StretcherEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
         matrixStackIn.push();
-        AxisAlignedBB bb = entityIn.getBoundingBox();
         matrixStackIn.rotate(Vector3f.YP.rotationDegrees(180.0F - entityYaw));
-        matrixStackIn.translate(0.5, -0.5, -1);
-//
+        int count = entityIn.getPlayerPassengers();
+        if (count == 0) {
+//            matrixStackIn.translate(0, -1.4375f, 0);
+        } else if (count == 1) {
+//            Vector3f.YP
+            Vector3d axis = entityIn.getForward();
+//            matrixStackIn.rotate(new Quaternion(new Vector3f((float) axis.x, (float) axis.y, (float) axis.z), 45, true));
+            matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-15));
+            matrixStackIn.translate(0, 0.375, 0);
+        } else {
+            matrixStackIn.translate(0, 0.5, 0);
+        }
+//        matrixStackIn.translate(0, -0.5, 0);
+
+////
 //        matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
 //        matrixStackIn.rotate(Vector3f.YP.rotationDegrees(90.0F));
         IVertexBuilder ivertexbuilder = bufferIn.getBuffer(this.model.getRenderType(this.getEntityTexture(entityIn)));
@@ -43,6 +57,6 @@ public class StretcherRenderer extends EntityRenderer<StretcherEntity> {
 
     @Override
     public ResourceLocation getEntityTexture(StretcherEntity entity) {
-        return new ResourceLocation(EmergenceMC.MOD_ID, "stretcher");
+        return new ResourceLocation(EmergenceMC.MOD_ID, "textures/entities/stretcher/stretcher.png");
     }
 }

@@ -86,25 +86,9 @@ public class StretcherEntity extends Entity {
     public boolean attackEntityFrom(DamageSource source, float amount) {
         this.removePassengers();
         return true;
-//        if (this.isInvulnerableTo(source)) {
-//            return false;
-//        } else if (!this.world.isRemote) {
-//            boolean flag = source.getTrueSource() instanceof PlayerEntity && ((PlayerEntity)source.getTrueSource()).abilities.isCreativeMode;
-//            if (flag) {
-//                if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
-////                    this.entityDropItem();
-//                }
-//
-//                this.remove();
-//            }
-//
-//            return true;
-//        } else {
-//            return true;
-//        }
     }
 
-    private int getPlayerPassengers() {
+    public int getPlayerPassengers() {
         return (int) this.getPassengers().stream().filter(e -> e instanceof PlayerEntity).count();
     }
 
@@ -173,7 +157,7 @@ public class StretcherEntity extends Entity {
 //            passenger.setRotationYawHe ad(index == 0 ? this.rotationYaw : this.rotationYaw + 180);
             pos = pos.add(offset);
         } else {
-            double passengerHeightOffset = 0.65;
+            double passengerHeightOffset = getPlayerPassengers() == 0 ? 0.65 : 0.1;
             pos = pos.add(0, passengerHeightOffset, 0);
         }
         applyYawToEntity(passenger);
@@ -215,9 +199,11 @@ public class StretcherEntity extends Entity {
     }
 
     @Override
-    protected boolean canFitPassenger(Entity passenger) {
-        return this.getPassengers().size() < 3;
-    }
+    protected boolean canFitPassenger(Entity passenger)  {
+        if (passenger instanceof PlayerEntity) {
+            return getPlayerPassengers() < 2;
+        }
+        return getNonPlayerPassengers() < 1;    }
 
     @Override
     public Entity getControllingPassenger() {
@@ -272,8 +258,11 @@ public class StretcherEntity extends Entity {
 
     @Override
     public double getMountedYOffset() {
-        return 0.35f;
+        return getPlayerPassengers() == 0 ? -9/16f : 6/16f;
     }
 
-
+    @Override
+    public double getYOffset() {
+        return 0.5;
+    }
 }
