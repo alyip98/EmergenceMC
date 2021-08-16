@@ -1,20 +1,14 @@
 package co.arisegames.emergencemc;
 
-import co.arisegames.emergencemc.common.blocks.LockedDoorBlock;
-import co.arisegames.emergencemc.common.entities.EntityTypesInit;
 import co.arisegames.emergencemc.client.render.StretcherRenderer;
+import co.arisegames.emergencemc.common.entities.EntityTypesInit;
 import co.arisegames.emergencemc.common.handlers.EmergenceMCPacketHandler;
-import co.arisegames.emergencemc.common.items.Crowbar;
-import co.arisegames.emergencemc.common.items.Extinguisher;
 import co.arisegames.emergencemc.common.network.StretcherMovePacket;
 import co.arisegames.emergencemc.common.network.SurvivorRescuedPacket;
 import co.arisegames.emergencemc.init.BlockInit;
 import co.arisegames.emergencemc.init.ItemInit;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -111,7 +105,6 @@ public class EmergenceMC
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
-            blockRegistryEvent.getRegistry().register(new LockedDoorBlock(AbstractBlock.Properties.create(Material.IRON)));
         }
 
         @SubscribeEvent
