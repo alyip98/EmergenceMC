@@ -1,8 +1,9 @@
 package co.arisegames.emergencemc.common.items;
 
-import co.arisegames.emergencemc.common.entities.EntityTypesInit;
-import co.arisegames.emergencemc.common.entities.StretcherEntity;
+import co.arisegames.emergencemc.common.blocks.Fire;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,14 +18,14 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Extinguisher extends Item {
+public class Flamethrower extends Item {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int RADIUS = 2;
     private static final double RANGE = 5;
 
-    public Extinguisher() {
-        super(new Item.Properties().maxDamage(100).group(ItemGroup.MISC));
+    public Flamethrower() {
+        super(new Properties().maxDamage(100).group(ItemGroup.MISC));
     }
 
     @Override
@@ -57,10 +58,10 @@ public class Extinguisher extends Item {
                 for (int j = -RADIUS; j <= RADIUS; j++) {
                     for (int k = -RADIUS; k <= RADIUS; k++) {
                         BlockPos target = base.add(i, j, k);
-                        if (world.getBlockState(target).getBlock() == Blocks.FIRE) {
-                            world.destroyBlock(target, true);
+                        if (world.getBlockState(target).getBlock() == Blocks.AIR && world.getBlockState(target.down()).isSolid() && random.nextInt(3) == 0) {
+                            world.setBlockState(target, Blocks.FIRE.getDefaultState());
                             for (int l = 0; l < 10; l++) {
-                                world.addParticle(ParticleTypes.SMOKE, target.getX(), target.getY(), target.getZ(), rand(), rand() + 1, rand());
+                                world.addParticle(ParticleTypes.FLAME, target.getX(), target.getY(), target.getZ(), rand(), rand() + 1, rand());
                             }
                         }
                     }
@@ -78,49 +79,14 @@ public class Extinguisher extends Item {
         }
     }
 
-    @Override
-    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        LOGGER.info("first");
-        return ActionResultType.PASS;
-    }
-
-    @Override
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
-        LOGGER.info("finish");
-        return super.onItemUseFinish(stack, worldIn, entityLiving);
-    }
-
-    @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        BlockPos base = context.getPos();
-        World world = context.getWorld();
-
-
-
-
-        LOGGER.info("Target: {}", base);
-
-
-
-
-        return ActionResultType.PASS;
-    }
 
     private double rand() {
         return random.nextDouble() - 0.5;
     }
 
     @Override
-    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
-        LOGGER.info("stop using");
-        super.onPlayerStoppedUsing(stack, worldIn, entityLiving, timeLeft);
-    }
-
-    @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        LOGGER.info("right click");
         playerIn.setActiveHand(handIn);
-//        worldIn.destroyBlock(target, true);
         return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
     }
 }

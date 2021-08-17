@@ -56,6 +56,7 @@ public class EmergenceMC
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         BlockInit.BLOCKS.register(bus);
+        BlockInit.REPLACED_BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
         EntityTypesInit.ENTITY_TYPES.register(bus);
     }

@@ -6,20 +6,30 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class Fire extends FireBlock {
-    private static final int ageRate = 4;
+    private static final int ageRate = 20;
+    private static final Set<Block> protectedBlocks = new HashSet<>();
+    private static final int encouragementBoost = 2;
 
     public Fire(AbstractBlock.Properties props) {
         super(props);
+        protectedBlocks.add(Blocks.FIRE);
+        protectedBlocks.add(Blocks.AIR);
+        protectedBlocks.add(Blocks.DIRT);
+        protectedBlocks.add(Blocks.GRASS);
+        protectedBlocks.add(Blocks.STONE);
+        protectedBlocks.add(Blocks.GRAVEL);
     }
 
     /**
      * Gets the delay before this block ticks again (without counting random ticks)
      */
     private static int getTickCooldown(Random rand) {
-        return 10;
+        return 20;
     }
 
     @Override
@@ -31,9 +41,9 @@ public class Fire extends FireBlock {
             }
 
             BlockState blockstate = worldIn.getBlockState(pos.down());
-            boolean flag = blockstate.isFireSource(worldIn, pos, Direction.UP);
+            boolean isFueled = blockstate.isFireSource(worldIn, pos, Direction.UP);
             int i = state.get(AGE);
-            if (!flag && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float)i * 0.03F) {
+            if (!isFueled && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float)i * 0.03F) {
                 worldIn.removeBlock(pos, false);
             } else {
                 int j = Math.min(15, i + rand.nextInt(ageRate + 1) / (ageRate));
@@ -42,7 +52,7 @@ public class Fire extends FireBlock {
                     worldIn.setBlockState(pos, state, 4);
                 }
 
-                if (!flag) {
+                if (!isFueled && rand.nextInt(3) == 0) {
                     if (!this.areNeighborsFlammable(worldIn, pos)) {
                         BlockPos blockpos = pos.down();
                         if (!worldIn.getBlockState(blockpos).isSolidSide(worldIn, blockpos, Direction.UP) || i > 3) {
@@ -78,7 +88,7 @@ public class Fire extends FireBlock {
                                 }
 
                                 blockpos$mutable.setAndOffset(pos, l, j1, i1);
-                                int l1 = this.getNeighborEncouragement(worldIn, blockpos$mutable);
+                                int l1 = this.getNeighborEncouragement(worldIn, blockpos$mutable) + encouragementBoost;
                                 if (l1 > 0) {
                                     int i2 = (l1 + 40 + worldIn.getDifficulty().getId() * 7) / (i + 30);
                                     if (flag1) {
@@ -101,7 +111,7 @@ public class Fire extends FireBlock {
 
     private BlockState getFireWithAge(IWorld world, BlockPos pos, int age) {
         BlockState blockstate = getFireForPlacement(world, pos);
-        return blockstate.matchesBlock(Blocks.FIRE) ? blockstate.with(AGE, Integer.valueOf(age)) : blockstate;
+        return blockstate.matchesBlock(Blocks.FIRE) ? blockstate.with(AGE, age) : blockstate;
     }
 
     private int getNeighborEncouragement(IWorldReader worldIn, BlockPos pos) {
@@ -112,7 +122,7 @@ public class Fire extends FireBlock {
 
             for(Direction direction : Direction.values()) {
                 BlockState blockstate = worldIn.getBlockState(pos.offset(direction));
-                i = Math.max(blockstate.getFireSpreadSpeed(worldIn, pos.offset(direction), direction.getOpposite()), i);
+                i = Math.max(blockstate.getFireSpreadSpeed(worldIn, pos.offset(direction), direction.getOpposite()) + (isInvalidBlock(blockstate) ? 0 : encouragementBoost), i);
             }
 
             return i;
@@ -120,7 +130,11 @@ public class Fire extends FireBlock {
     }
 
     private void tryCatchFire(World worldIn, BlockPos pos, int chance, Random random, int age, Direction face) {
-        int i = worldIn.getBlockState(pos).getFlammability(worldIn, pos, face);
+        BlockState blockState = worldIn.getBlockState(pos);
+        int i = blockState.getFlammability(worldIn, pos, face);
+        if (isInvalidBlock(blockState.getBlock())) return;
+        i += 10;
+        if (blockState.getMaterial().isFlammable()) i += 15;
         if (random.nextInt(chance) < i) {
             BlockState blockstate = worldIn.getBlockState(pos);
             if (random.nextInt(age + 10) < 5 && !worldIn.isRainingAt(pos)) {
@@ -135,6 +149,12 @@ public class Fire extends FireBlock {
 
     }
 
+    @Override
+    public boolean canCatchFire(IBlockReader world, BlockPos pos, Direction face) {
+        BlockState blockState = world.getBlockState(pos);
+        return blockState.isFlammable(world, pos, face) || !isInvalidBlock(blockState.getBlock());
+    }
+
     private boolean areNeighborsFlammable(IBlockReader worldIn, BlockPos pos) {
         for(Direction direction : Direction.values()) {
             if (this.canCatchFire(worldIn, pos.offset(direction), direction.getOpposite())) {
@@ -146,7 +166,11 @@ public class Fire extends FireBlock {
     }
 
     private boolean isInvalidBlock(Block block) {
-        return block == Blocks.AIR || block == Blocks.FIRE;
+        return protectedBlocks.contains(block);
+    }
+
+    private boolean isInvalidBlock(BlockState blockState) {
+        return protectedBlocks.contains(blockState.getBlock());
     }
 
 

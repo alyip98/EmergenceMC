@@ -4,6 +4,7 @@ import co.arisegames.emergencemc.EmergenceMC;
 import co.arisegames.emergencemc.common.entities.EntityTypesInit;
 import co.arisegames.emergencemc.common.items.Crowbar;
 import co.arisegames.emergencemc.common.items.Extinguisher;
+import co.arisegames.emergencemc.common.items.Flamethrower;
 import co.arisegames.emergencemc.common.items.StretcherItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -26,6 +27,9 @@ public class ItemInit {
 
     public static final RegistryObject<Item> EXTINGUISHER = ITEMS.register("extinguisher",
             Extinguisher::new);
+
+    public static final RegistryObject<Item> FlAMETHROWER = ITEMS.register("flamethrower",
+            Flamethrower::new);
 
     public static final RegistryObject<Item> CROWBAR = ITEMS.register("crowbar",
             Crowbar::new);
