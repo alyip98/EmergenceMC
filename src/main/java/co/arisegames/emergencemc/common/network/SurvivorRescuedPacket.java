@@ -1,23 +1,17 @@
 package co.arisegames.emergencemc.common.network;
 
 import co.arisegames.emergencemc.util.RandomUtil;
-import net.minecraft.client.ClientGameSession;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class SurvivorRescuedPacket {
@@ -56,6 +50,7 @@ public class SurvivorRescuedPacket {
         ctx.get().setPacketHandled(true);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void processClient(Supplier<NetworkEvent.Context> ctx) {
         World world = Minecraft.getInstance().world;
         Vector3d base = new Vector3d(this.x, this.y, this.z);
