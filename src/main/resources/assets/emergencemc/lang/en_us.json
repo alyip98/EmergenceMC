@@ -1,6 +1,10 @@
 {
   "item.emergencemc.example_item": "Example Item",
   "item.emergencemc.extinguisher": "Extinguisher",
+  "item.emergencemc.crowbar": "Crowbar",
+  "item.emergencemc.flamethrower": "Flamethrower",
+  "item.emergencemc.stretcher_item": "Stretcher",
 
-  "block.emergencemc.example_block": "Example Block"
+  "block.emergencemc.example_block": "Example Block",
+  "block.emergencemc.rescue_block": "Rescue Point"
 }

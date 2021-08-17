@@ -51,26 +51,28 @@ public class Extinguisher extends Item {
         Vector3d look = player.getLookVec();
         Vector3d end = start.add(look.scale(RANGE));
         BlockRayTraceResult result = world.rayTraceBlocks(new RayTraceContext(start, end, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.ANY, player));
-        if (result.getType() != RayTraceResult.Type.MISS) {
-            BlockPos base = result.getPos();
-            for (int i = -RADIUS; i <= RADIUS; i++) {
-                for (int j = -RADIUS; j <= RADIUS; j++) {
-                    for (int k = -RADIUS; k <= RADIUS; k++) {
-                        BlockPos target = base.add(i, j, k);
-                        if (world.getBlockState(target).getBlock() == Blocks.FIRE) {
-                            world.destroyBlock(target, true);
-                            for (int l = 0; l < 10; l++) {
-                                world.addParticle(ParticleTypes.SMOKE, target.getX(), target.getY(), target.getZ(), rand(), rand() + 1, rand());
-                            }
+        BlockPos base = result.getPos();
+        if (result.getType() == RayTraceResult.Type.MISS) {
+            base = new BlockPos(end);
+        }
+        for (int i = -RADIUS; i <= RADIUS; i++) {
+            for (int j = -RADIUS; j <= RADIUS; j++) {
+                for (int k = -RADIUS; k <= RADIUS; k++) {
+                    BlockPos target = base.add(i, j, k);
+                    if (world.getBlockState(target).getBlock() == Blocks.FIRE) {
+                        world.destroyBlock(target, true);
+                        for (int l = 0; l < 10; l++) {
+                            world.addParticle(ParticleTypes.SMOKE, target.getX(), target.getY(), target.getZ(), rand(), rand() + 1, rand());
                         }
                     }
                 }
             }
-
-            world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(base.add(-RADIUS, -RADIUS, -RADIUS), base.add(RADIUS, RADIUS, RADIUS))).forEach(
-                    Entity::extinguish
-            );
         }
+
+        world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(base.add(-RADIUS, -RADIUS, -RADIUS), base.add(RADIUS, RADIUS, RADIUS))).forEach(
+                Entity::extinguish
+        );
+
         Vector3d vec1 = player.getPositionVec().add(0, 1.2, 0).add(look.scale(0.3));
         for (int i = 0; i < 5; i++) {
             Vector3d speed = look.scale(1).add(new Vector3d(rand(), rand(), rand()).scale(0.7));
@@ -96,11 +98,7 @@ public class Extinguisher extends Item {
         World world = context.getWorld();
 
 
-
-
         LOGGER.info("Target: {}", base);
-
-
 
 
         return ActionResultType.PASS;

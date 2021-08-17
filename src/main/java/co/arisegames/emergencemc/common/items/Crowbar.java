@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 public class Crowbar extends Item {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private int swings = 0;
 
     public Crowbar() {
         super(new Item.Properties().maxDamage(100).group(ItemGroup.MISC));
@@ -42,9 +43,13 @@ public class Crowbar extends Item {
         World world = context.getWorld();
         if (target.getBlock() instanceof DoorBlock) {
             DoorBlock door = (DoorBlock) target.getBlock();
-            if (!world.isRemote && random.nextDouble() < 0.1) {
-                door.openDoor(world, target, pos, true);
-                world.setBlockState(pos, world.getBlockState(pos));
+            if (!world.isRemote) {
+                swings++;
+                if (random.nextDouble() < 0.03 || swings > 50) {
+                    swings = 0;
+                    door.openDoor(world, target, pos, true);
+                    world.setBlockState(pos, world.getBlockState(pos));
+                }
             }
 
             world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.1f, random.nextFloat()/2 + 1.6f, false);

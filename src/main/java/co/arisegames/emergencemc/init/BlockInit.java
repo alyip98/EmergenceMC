@@ -22,8 +22,8 @@ public class BlockInit {
             "minecraft");
 
     public static final RegistryObject<Block> EXAMPLE_BLOCK;
-    private static final RegistryObject<RescueBlock> RESCUE_BLOCK;
-    private static final RegistryObject<Fire> FIRE_BLOCK;
+    public static final RegistryObject<RescueBlock> RESCUE_BLOCK;
+    public static final RegistryObject<Fire> FIRE_BLOCK;
 
     static {
         EXAMPLE_BLOCK = BLOCKS

@@ -1,6 +1,8 @@
 package co.arisegames.emergencemc.common.blocks;
 
+import co.arisegames.emergencemc.init.BlockInit;
 import net.minecraft.block.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
@@ -10,26 +12,35 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import static co.arisegames.emergencemc.init.BlockInit.FIRE_BLOCK;
+
 public class Fire extends FireBlock {
     private static final int ageRate = 20;
+    private static final int tickInterval = 40;
     private static final Set<Block> protectedBlocks = new HashSet<>();
-    private static final int encouragementBoost = 2;
+    private static final int encouragementBoost = 1;
 
     public Fire(AbstractBlock.Properties props) {
         super(props);
         protectedBlocks.add(Blocks.FIRE);
         protectedBlocks.add(Blocks.AIR);
         protectedBlocks.add(Blocks.DIRT);
-        protectedBlocks.add(Blocks.GRASS);
+        protectedBlocks.add(Blocks.GRASS_BLOCK);
         protectedBlocks.add(Blocks.STONE);
         protectedBlocks.add(Blocks.GRAVEL);
+        protectedBlocks.add(Blocks.BEDROCK);
+        protectedBlocks.add(Blocks.STRUCTURE_BLOCK);
+        protectedBlocks.add(Blocks.STRUCTURE_VOID);
+        protectedBlocks.add(Blocks.IRON_DOOR);
+        protectedBlocks.add(BlockInit.RESCUE_BLOCK.get());
+        protectedBlocks.add(this);
     }
 
     /**
      * Gets the delay before this block ticks again (without counting random ticks)
      */
     private static int getTickCooldown(Random rand) {
-        return 20;
+        return (tickInterval + rand.nextInt(tickInterval)) / 2;
     }
 
     @Override
@@ -43,7 +54,7 @@ public class Fire extends FireBlock {
             BlockState blockstate = worldIn.getBlockState(pos.down());
             boolean isFueled = blockstate.isFireSource(worldIn, pos, Direction.UP);
             int i = state.get(AGE);
-            if (!isFueled && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float)i * 0.03F) {
+            if (!isFueled && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float) i * 0.03F) {
                 worldIn.removeBlock(pos, false);
             } else {
                 int j = Math.min(15, i + rand.nextInt(ageRate + 1) / (ageRate));
@@ -68,8 +79,8 @@ public class Fire extends FireBlock {
                     }
                 }
 
-                boolean flag1 = worldIn.isBlockinHighHumidity(pos);
-                int k = flag1 ? -50 : 0;
+                boolean isHumid = worldIn.isBlockinHighHumidity(pos);
+                int k = isHumid ? -50 : 0;
                 this.tryCatchFire(worldIn, pos.east(), 300 + k, rand, i, Direction.WEST);
                 this.tryCatchFire(worldIn, pos.west(), 300 + k, rand, i, Direction.EAST);
                 this.tryCatchFire(worldIn, pos.down(), 250 + k, rand, i, Direction.UP);
@@ -78,9 +89,9 @@ public class Fire extends FireBlock {
                 this.tryCatchFire(worldIn, pos.south(), 300 + k, rand, i, Direction.NORTH);
                 BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
-                for(int l = -1; l <= 1; ++l) {
-                    for(int i1 = -1; i1 <= 1; ++i1) {
-                        for(int j1 = -1; j1 <= 4; ++j1) {
+                for (int l = -1; l <= 1; ++l) {
+                    for (int i1 = -1; i1 <= 1; ++i1) {
+                        for (int j1 = -1; j1 <= 4; ++j1) {
                             if (l != 0 || j1 != 0 || i1 != 0) {
                                 int k1 = 100;
                                 if (j1 > 1) {
@@ -88,10 +99,10 @@ public class Fire extends FireBlock {
                                 }
 
                                 blockpos$mutable.setAndOffset(pos, l, j1, i1);
-                                int l1 = this.getNeighborEncouragement(worldIn, blockpos$mutable) + encouragementBoost;
+                                int l1 = this.getNeighborEncouragement(worldIn, blockpos$mutable);
                                 if (l1 > 0) {
                                     int i2 = (l1 + 40 + worldIn.getDifficulty().getId() * 7) / (i + 30);
-                                    if (flag1) {
+                                    if (isHumid) {
                                         i2 /= 2;
                                     }
 
@@ -120,7 +131,7 @@ public class Fire extends FireBlock {
         } else {
             int i = 0;
 
-            for(Direction direction : Direction.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockState blockstate = worldIn.getBlockState(pos.offset(direction));
                 i = Math.max(blockstate.getFireSpreadSpeed(worldIn, pos.offset(direction), direction.getOpposite()) + (isInvalidBlock(blockstate) ? 0 : encouragementBoost), i);
             }
@@ -156,7 +167,7 @@ public class Fire extends FireBlock {
     }
 
     private boolean areNeighborsFlammable(IBlockReader worldIn, BlockPos pos) {
-        for(Direction direction : Direction.values()) {
+        for (Direction direction : Direction.values()) {
             if (this.canCatchFire(worldIn, pos.offset(direction), direction.getOpposite())) {
                 return true;
             }
@@ -170,7 +181,7 @@ public class Fire extends FireBlock {
     }
 
     private boolean isInvalidBlock(BlockState blockState) {
-        return protectedBlocks.contains(blockState.getBlock());
+        return isInvalidBlock(blockState.getBlock());
     }
 
 
