@@ -26,7 +26,7 @@ public class Crowbar extends Item {
 
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
-        LOGGER.info("swing");
+//        LOGGER.info("swing");
         return false;
     }
 

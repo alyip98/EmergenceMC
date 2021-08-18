@@ -2,7 +2,7 @@ package co.arisegames.emergencemc.common.blocks;
 
 import co.arisegames.emergencemc.init.BlockInit;
 import net.minecraft.block.*;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.block.material.Material;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
@@ -12,13 +12,13 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import static co.arisegames.emergencemc.init.BlockInit.FIRE_BLOCK;
-
 public class Fire extends FireBlock {
     private static final int ageRate = 20;
     private static final int tickInterval = 40;
     private static final Set<Block> protectedBlocks = new HashSet<>();
     private static final int encouragementBoost = 1;
+    private static final float debrisChance = 0.4f;
+    private final Random random = new Random();
 
     public Fire(AbstractBlock.Properties props) {
         super(props);
@@ -27,7 +27,6 @@ public class Fire extends FireBlock {
         protectedBlocks.add(Blocks.DIRT);
         protectedBlocks.add(Blocks.GRASS_BLOCK);
         protectedBlocks.add(Blocks.STONE);
-        protectedBlocks.add(Blocks.GRAVEL);
         protectedBlocks.add(Blocks.BEDROCK);
         protectedBlocks.add(Blocks.STRUCTURE_BLOCK);
         protectedBlocks.add(Blocks.STRUCTURE_VOID);
@@ -43,19 +42,34 @@ public class Fire extends FireBlock {
         return (tickInterval + rand.nextInt(tickInterval)) / 2;
     }
 
+    private boolean canGenerateDebris(Material material) {
+        return material == Material.ROCK
+                || material == Material.IRON
+                || material == Material.EARTH
+                || material == Material.CLAY;
+    }
+
+    private void destroyBlockAt(World world, BlockPos blockPos) {
+        BlockState blockState = world.getBlockState(blockPos);
+        if (canGenerateDebris(blockState.getMaterial()) && random.nextFloat() < debrisChance) {
+            world.setBlockState(blockPos, Blocks.GRAVEL.getDefaultState());
+        } else
+            world.removeBlock(blockPos, false);
+    }
+
     @Override
     public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
         worldIn.getPendingBlockTicks().scheduleTick(pos, this, getTickCooldown(worldIn.rand));
         if (worldIn.getGameRules().getBoolean(GameRules.DO_FIRE_TICK)) {
             if (!state.isValidPosition(worldIn, pos)) {
-                worldIn.removeBlock(pos, false);
+                this.destroyBlockAt(worldIn, pos);
             }
 
             BlockState blockstate = worldIn.getBlockState(pos.down());
             boolean isFueled = blockstate.isFireSource(worldIn, pos, Direction.UP);
             int i = state.get(AGE);
             if (!isFueled && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float) i * 0.03F) {
-                worldIn.removeBlock(pos, false);
+                this.destroyBlockAt(worldIn, pos);
             } else {
                 int j = Math.min(15, i + rand.nextInt(ageRate + 1) / (ageRate));
                 if (i != j) {
@@ -67,14 +81,14 @@ public class Fire extends FireBlock {
                     if (!this.areNeighborsFlammable(worldIn, pos)) {
                         BlockPos blockpos = pos.down();
                         if (!worldIn.getBlockState(blockpos).isSolidSide(worldIn, blockpos, Direction.UP) || i > 3) {
-                            worldIn.removeBlock(pos, false);
+                            this.destroyBlockAt(worldIn, pos);
                         }
 
                         return;
                     }
 
                     if (i == 15 && rand.nextInt(4) == 0 && !this.canCatchFire(worldIn, pos.down(), Direction.UP)) {
-                        worldIn.removeBlock(pos, false);
+                        this.destroyBlockAt(worldIn, pos);
                         return;
                     }
                 }
@@ -152,7 +166,7 @@ public class Fire extends FireBlock {
                 int j = Math.min(age + random.nextInt(5) / 4, 15);
                 worldIn.setBlockState(pos, this.getFireWithAge(worldIn, pos, j), 3);
             } else {
-                worldIn.removeBlock(pos, false);
+                this.destroyBlockAt(worldIn, pos);
             }
 
             blockstate.catchFire(worldIn, pos, face, null);

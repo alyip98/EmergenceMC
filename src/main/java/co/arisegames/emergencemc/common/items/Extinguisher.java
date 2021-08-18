@@ -45,7 +45,7 @@ public class Extinguisher extends Item {
 
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        LOGGER.info("using");
+//        LOGGER.info("using");
         World world = player.getEntityWorld();
         Vector3d start = player.getEyePosition(1);
         Vector3d look = player.getLookVec();
@@ -82,13 +82,13 @@ public class Extinguisher extends Item {
 
     @Override
     public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        LOGGER.info("first");
+//        LOGGER.info("first");
         return ActionResultType.PASS;
     }
 
     @Override
     public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
-        LOGGER.info("finish");
+//        LOGGER.info("finish");
         return super.onItemUseFinish(stack, worldIn, entityLiving);
     }
 
@@ -98,7 +98,7 @@ public class Extinguisher extends Item {
         World world = context.getWorld();
 
 
-        LOGGER.info("Target: {}", base);
+//        LOGGER.info("Target: {}", base);
 
 
         return ActionResultType.PASS;

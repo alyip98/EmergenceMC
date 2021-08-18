@@ -46,7 +46,7 @@ public class Flamethrower extends Item {
 
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        LOGGER.info("using");
+//        LOGGER.info("using");
         World world = player.getEntityWorld();
         Vector3d start = player.getEyePosition(1);
         Vector3d look = player.getLookVec();
