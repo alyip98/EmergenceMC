@@ -1,8 +1,10 @@
 package co.arisegames.emergencemc.common.entities;
 
+import co.arisegames.emergencemc.init.ItemInit;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.ActionResultType;
@@ -60,7 +62,7 @@ public class StretcherEntity extends Entity {
         this.move(MoverType.SELF, this.getMotion());
 
         this.doBlockCollisions();
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getBoundingBox().grow((double) 0.2F, (double) -0.01F, (double) 0.2F), EntityPredicates.pushableBy(this));
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getBoundingBox().grow((double) 0.2F, (double) -0.01F, (double) 0.2F), null);
         if (!list.isEmpty()) {
             boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof PlayerEntity);
 
@@ -81,8 +83,14 @@ public class StretcherEntity extends Entity {
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        this.removePassengers();
-        return true;
+        if (!(source.getImmediateSource() instanceof PlayerEntity)) return false;
+        if (this.getPassengers().stream().count() != 0)
+            this.removePassengers();
+        else {
+            this.entityDropItem(new ItemStack(ItemInit.STRETCHER_ITEM.get(), 1));
+            this.remove();
+        }
+        return false;
     }
 
     public int getPlayerPassengers() {
@@ -95,15 +103,15 @@ public class StretcherEntity extends Entity {
 
     private float getSpeed() {
         if (getNonPlayerPassengers() == 0) {
-            return 0.12f;
+            return 0.2f;
         }
         switch (getPlayerPassengers()) {
             case 0:
                 return 0;
             case 1:
-                return 0.03f;
+                return 0.1f;
             default:
-                return 0.12f;
+                return 0.2f;
         }
     }
 

@@ -13,16 +13,17 @@ import java.util.Random;
 import java.util.Set;
 
 public class Fire extends FireBlock {
-    private static final int ageRate = 20;
-    private static final int tickInterval = 40;
+    private static final int ageRate = 80;
+    private static final int tickInterval = 80;
     private static final Set<Block> protectedBlocks = new HashSet<>();
-    private static final int encouragementBoost = 1;
+    private static final int encouragementBoost = 3;
     private static final float debrisChance = 0.4f;
     private final Random random = new Random();
 
     public Fire(AbstractBlock.Properties props) {
         super(props);
         protectedBlocks.add(Blocks.FIRE);
+        protectedBlocks.add(Blocks.WATER);
         protectedBlocks.add(Blocks.AIR);
         protectedBlocks.add(Blocks.DIRT);
         protectedBlocks.add(Blocks.GRASS_BLOCK);
@@ -158,8 +159,8 @@ public class Fire extends FireBlock {
         BlockState blockState = worldIn.getBlockState(pos);
         int i = blockState.getFlammability(worldIn, pos, face);
         if (isInvalidBlock(blockState.getBlock())) return;
-        i += 10;
-        if (blockState.getMaterial().isFlammable()) i += 15;
+        i += 5;
+        if (blockState.getMaterial().isFlammable()) i += 10;
         if (random.nextInt(chance) < i) {
             BlockState blockstate = worldIn.getBlockState(pos);
             if (random.nextInt(age + 10) < 5 && !worldIn.isRainingAt(pos)) {
